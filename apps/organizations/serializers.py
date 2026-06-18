@@ -1,0 +1,64 @@
+"""Organization serializers."""
+from rest_framework import serializers
+from .models import Organization
+from apps.utils.images import upload_image_to_imgbb as upload_logo_to_imgbb
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    """Serializer for Organization model."""
+    
+    is_trial_expired = serializers.ReadOnlyField()
+    is_subscription_active = serializers.ReadOnlyField()
+    logo_file = serializers.ImageField(write_only=True, required=False, help_text='Upload logo file')
+    logo = serializers.URLField(read_only=True)
+    
+    class Meta:
+        model = Organization
+        fields = [
+            'id', 'name', 'logo', 'logo_file', 'address', 'phone',
+            'subscription_plan', 'subscription_status',
+            'subscription_expires_at', 'trial_ends_at',
+            'monthly_price', 'is_trial_expired',
+            'is_subscription_active', 'created_at', 'updated_at'
+        ]
+        # Billing fields are controlled by super-admin/billing flows only,
+        # never editable by a restaurant manager via this serializer.
+        read_only_fields = [
+            'id', 'created_at', 'updated_at', 'logo',
+            'subscription_plan', 'subscription_status',
+            'subscription_expires_at', 'trial_ends_at', 'monthly_price',
+        ]
+    
+    def create(self, validated_data):
+        """Create organization with ImgBB logo upload."""
+        logo_file = validated_data.pop('logo_file', None)
+        
+        # Upload logo to ImgBB if provided
+        if logo_file:
+            validated_data['logo'] = upload_logo_to_imgbb(logo_file)
+        
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        """Update organization with ImgBB logo upload."""
+        logo_file = validated_data.pop('logo_file', None)
+        
+        # Upload new logo to ImgBB if provided
+        if logo_file:
+            validated_data['logo'] = upload_logo_to_imgbb(logo_file)
+        
+        return super().update(instance, validated_data)
+    
+    def validate_phone(self, value: str) -> str:
+        """Validate phone number format."""
+        if value and not value.replace('+', '').replace(' ', '').isdigit():
+            raise serializers.ValidationError("Invalid phone number format")
+        return value
+
+
+class OrganizationListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for organization list."""
+    
+    class Meta:
+        model = Organization
+        fields = ['id', 'name', 'logo', 'subscription_plan', 'subscription_status']

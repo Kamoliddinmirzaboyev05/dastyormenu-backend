@@ -1,0 +1,49 @@
+{
+  "count": 3,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "06d3d05d-0da5-4577-9056-5e242f5ac6d8",
+      "name": "Osh",
+      "description": "O'zbek milliy taomi, guruch va go'sht bilan",
+      "image_url": null,
+      "price": 2500000,
+      "price_uzs": 25000.0,
+      "category_id": "22d6bd39-6e52-4e9f-ab3a-e9d97593f764",
+      "category_name": "Asosiy taomlar",
+      "ingredients": "Guruch, go'sht, sabzi, piyoz, zira",
+      "is_available": true,
+      "cook_time_minutes": 15,
+      "sort_order": 1
+    },
+    {
+      "id": "4f45e694-1ca5-471a-9725-96c3d0d93b79",
+      "name": "Achichuk salat",
+      "description": "Yangi pomidor va piyoz salati",
+      "image_url": null,
+      "price": 800000,
+      "price_uzs": 8000.0,
+      "category_id": "fd6ae14d-33d2-4f30-a738-4c6a17dbc005",
+      "category_name": "Salatlar",
+      "ingredients": "Pomidor, piyoz, ko'katlar, zaytun moyi",
+      "is_available": true,
+      "cook_time_minutes": 5,
+      "sort_order": 1
+    },
+    {
+      "id": "ad04f52b-2113-4886-9b18-e43ed913c7aa",
+      "name": "Lag'mon",
+      "description": "Qo'l bilan cho'zilgan xamir va go'sht",
+      "image_url": null,
+      "price": 3000000,
+      "price_uzs": 30000.0,
+      "category_id": "22d6bd39-6e52-4e9f-ab3a-e9d97593f764",
+      "category_name": "Asosiy taomlar",
+      "ingredients": "Xamir, go'sht, sabzavotlar, sous",
+      "is_available": true,
+      "cook_time_minutes": 20,
+      "sort_order": 2
+    }
+  ]
+}
