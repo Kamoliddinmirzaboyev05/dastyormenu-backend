@@ -25,4 +25,6 @@ RUN python manage.py collectstatic --noinput || true
 
 EXPOSE 8000
 
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
+# Runs DB migrations + collectstatic + optional admin, then starts the ASGI
+# server. Render/Railway inject $PORT.
+CMD ["bash", "scripts/start.sh"]

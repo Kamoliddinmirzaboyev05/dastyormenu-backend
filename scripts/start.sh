@@ -1,7 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "Starting Dastyor Backend..."
+# Always run with production settings (security-hardened, fail-closed).
+: "${DJANGO_SETTINGS_MODULE:=config.settings.production}"
+export DJANGO_SETTINGS_MODULE
+
+echo "Starting Dastyor Backend ($DJANGO_SETTINGS_MODULE)..."
 
 # Wait for database to be ready
 echo "Waiting for database..."

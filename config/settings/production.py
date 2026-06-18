@@ -13,9 +13,12 @@ if not DEBUG:
             'Generate one with scripts/generate_secret_key.py.'
         )
 
-# ALLOWED_HOSTS — must be explicit in production.
+# ALLOWED_HOSTS — explicit env, plus Render's auto-provided hostname.
 allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = [h.strip() for h in allowed_hosts.split(',') if h.strip()]
+RENDER_HOST = os.getenv('RENDER_EXTERNAL_HOSTNAME')  # Render sets this automatically
+if RENDER_HOST and RENDER_HOST not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_HOST)
 if not ALLOWED_HOSTS and not DEBUG:
     raise RuntimeError('ALLOWED_HOSTS must be set in production (comma-separated domains).')
 
@@ -30,6 +33,8 @@ if not CORS_ALLOWED_ORIGINS and not DEBUG:
 # CSRF trusted origins — derive from CORS origins if not set explicitly.
 csrf_origins = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
 CSRF_TRUSTED_ORIGINS = csrf_origins or list(CORS_ALLOWED_ORIGINS)
+if RENDER_HOST:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_HOST}')
 
 # --- Static / media -----------------------------------------------------------
 # WhiteNoise for static. NOTE: media (uploads) on local disk are ephemeral on
