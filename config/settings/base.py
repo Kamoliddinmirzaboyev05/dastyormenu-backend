@@ -79,8 +79,11 @@ TEMPLATES = [
 # Railway uses DATABASE_URL, parse it if available
 import dj_database_url
 
+import sys as _sys
+
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
+    # Preferred: managed Postgres (Render/Railway inject DATABASE_URL).
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -88,15 +91,30 @@ if DATABASE_URL:
             conn_health_checks=True,
         )
     }
-else:
+elif os.getenv('DB_HOST'):
+    # Explicit Postgres via DB_* vars (local dev).
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME', 'dastyor_db'),
             'USER': os.getenv('DB_USER', 'postgres'),
             'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'HOST': os.getenv('DB_HOST'),
             'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+else:
+    # No database configured — SQLite fallback so the app still boots.
+    # WARNING: on Render free tier the disk is ephemeral, so SQLite data is
+    # WIPED on every deploy. Add a managed Postgres and set DATABASE_URL for
+    # real persistence (strongly recommended for multi-tenant production).
+    print('WARNING: No DATABASE_URL/DB_HOST set — falling back to ephemeral '
+          'SQLite. Set DATABASE_URL to a managed Postgres for persistent data.',
+          file=_sys.stderr)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
