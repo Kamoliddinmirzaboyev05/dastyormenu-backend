@@ -1,7 +1,7 @@
 """Organization serializers."""
 from rest_framework import serializers
 from .models import Organization
-from apps.utils.images import upload_image_to_imgbb as upload_logo_to_imgbb
+from apps.utils.images import store_image
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -30,23 +30,25 @@ class OrganizationSerializer(serializers.ModelSerializer):
         ]
     
     def create(self, validated_data):
-        """Create organization with ImgBB logo upload."""
+        """Create organization, storing the uploaded logo (local disk / ImgBB)."""
         logo_file = validated_data.pop('logo_file', None)
-        
-        # Upload logo to ImgBB if provided
+
         if logo_file:
-            validated_data['logo'] = upload_logo_to_imgbb(logo_file)
-        
+            validated_data['logo'] = store_image(
+                logo_file, self.context.get('request'), 'logos'
+            )
+
         return super().create(validated_data)
-    
+
     def update(self, instance, validated_data):
-        """Update organization with ImgBB logo upload."""
+        """Update organization, storing a new logo when provided."""
         logo_file = validated_data.pop('logo_file', None)
-        
-        # Upload new logo to ImgBB if provided
+
         if logo_file:
-            validated_data['logo'] = upload_logo_to_imgbb(logo_file)
-        
+            validated_data['logo'] = store_image(
+                logo_file, self.context.get('request'), 'logos'
+            )
+
         return super().update(instance, validated_data)
     
     def validate_phone(self, value: str) -> str:

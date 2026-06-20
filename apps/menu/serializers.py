@@ -1,7 +1,7 @@
 """Menu serializers."""
 from rest_framework import serializers
 from .models import Category, Menu
-from apps.utils.images import upload_image_to_imgbb as upload_to_imgbb
+from apps.utils.images import store_image
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -48,23 +48,25 @@ class MenuSerializer(serializers.ModelSerializer):
         }
     
     def create(self, validated_data):
-        """Create menu item with ImgBB image upload."""
+        """Create menu item, storing the uploaded image (local disk / ImgBB)."""
         image_file = validated_data.pop('image', None)
-        
-        # Upload image to ImgBB if provided
+
         if image_file:
-            validated_data['image_url'] = upload_to_imgbb(image_file)
-        
+            validated_data['image_url'] = store_image(
+                image_file, self.context.get('request'), 'menu'
+            )
+
         return super().create(validated_data)
-    
+
     def update(self, instance, validated_data):
-        """Update menu item with ImgBB image upload."""
+        """Update menu item, storing a new image when provided."""
         image_file = validated_data.pop('image', None)
-        
-        # Upload new image to ImgBB if provided
+
         if image_file:
-            validated_data['image_url'] = upload_to_imgbb(image_file)
-        
+            validated_data['image_url'] = store_image(
+                image_file, self.context.get('request'), 'menu'
+            )
+
         return super().update(instance, validated_data)
     
     def validate_price(self, value: int) -> int:

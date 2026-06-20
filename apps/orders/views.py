@@ -54,9 +54,9 @@ class OrderViewSet(OrganizationMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Return appropriate serializer."""
-        if self.action == 'list':
-            return OrderListSerializer
-        elif self.action == 'create':
+        # Admin order board needs items + waiter in one call, so use the full
+        # serializer for list too (queryset already prefetches items/relations).
+        if self.action == 'create':
             return PublicOrderSerializer
         return OrderSerializer
 
