@@ -51,18 +51,12 @@ class IsWaiterOrAbove(permissions.BasePermission):
 
 
 class IsOwnOrganization(permissions.BasePermission):
-    """Ensure user can only access their own organization's data."""
-    
+    """Ensure user can only access their own organization's data.
+
+    Delegates to :class:`apps.organizations.scoping.TenantScope` so the object
+    check uses the same rule as queryset scoping and writes.
+    """
+
     def has_object_permission(self, request, view, obj):
-        if not hasattr(request.user, 'userprofile'):
-            return False
-        
-        # Super admin can access all
-        if request.user.userprofile.role == 'super_admin':
-            return True
-        
-        # Check if object belongs to user's organization
-        if hasattr(obj, 'organization'):
-            return obj.organization_id == request.user.userprofile.organization_id
-        
-        return False
+        from apps.organizations.scoping import TenantScope
+        return TenantScope.can_access(request.user, obj)

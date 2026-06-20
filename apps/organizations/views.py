@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from .models import Organization
+from .scoping import TenantScope
 from .serializers import OrganizationSerializer, OrganizationListSerializer
 from apps.users.permissions import IsSuperAdmin, IsManagerOrAbove
 
@@ -34,15 +35,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Tenant-scoped: super admin sees all; others only their own org."""
-        user = self.request.user
-        if not (user.is_authenticated and hasattr(user, 'userprofile')):
-            return Organization.objects.none()
-        profile = user.userprofile
-        if profile.role == 'super_admin':
-            return Organization.objects.all()
-        if profile.organization_id:
-            return Organization.objects.filter(id=profile.organization_id)
-        return Organization.objects.none()
+        return TenantScope.scope_organizations(Organization.objects.all(), self.request.user)
     
     @extend_schema(
         request={
